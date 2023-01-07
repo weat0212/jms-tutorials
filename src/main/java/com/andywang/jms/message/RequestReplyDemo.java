@@ -10,6 +10,8 @@ import javax.jms.Queue;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RequestReplyDemo {
 
@@ -27,6 +29,10 @@ public class RequestReplyDemo {
             Queue replyQueue = jmsContext.createTemporaryQueue();
             message.setJMSReplyTo(replyQueue);
             producer.send(requestQueue, message);
+            System.out.println(message.getJMSMessageID());
+
+//            Map<String, TextMessage> requestMsg = new HashMap<>();
+//            requestMsg.put(message.getJMSMessageID(), message);
 
             // B: (Received Message)
             JMSConsumer consumer = jmsContext.createConsumer(requestQueue);
@@ -35,12 +41,17 @@ public class RequestReplyDemo {
 
             // B: I'm fine, thank u.
             JMSProducer replyProducer = jmsContext.createProducer();
-            replyProducer.send(messageReceived.getJMSReplyTo(), "I'm fine, thank u.");
+            TextMessage replyMessage = jmsContext.createTextMessage("I'm fine, thank u.");
+            // recognized by ID
+            replyMessage.setJMSCorrelationID(messageReceived.getJMSMessageID());
+            replyProducer.send(messageReceived.getJMSReplyTo(), replyMessage);
 
             // A: (Received Message)
             JMSConsumer replyConsumer = jmsContext.createConsumer(replyQueue);
-            String replyMessageReceived = replyConsumer.receiveBody(String.class);
-            System.out.println("Received Reply Message: " + replyMessageReceived);
+            TextMessage replyReceived = (TextMessage) replyConsumer.receive();
+            System.out.println(replyReceived.getJMSCorrelationID());
+            System.out.println("Received Reply Message: " + replyReceived.getText());
+//            System.out.println(requestMsg.get(replyReceived.getJMSCorrelationID()).getText());
         }
     }
 }
