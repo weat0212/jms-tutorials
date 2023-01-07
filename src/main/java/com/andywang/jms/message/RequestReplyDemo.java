@@ -17,7 +17,6 @@ public class RequestReplyDemo {
 
         InitialContext initialContext = new InitialContext();
         Queue requestQueue = (Queue) initialContext.lookup("queue/requestQueue");
-        Queue replyQueue = (Queue) initialContext.lookup("queue/replyQueue");
 
         try(ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
             JMSContext jmsContext = cf.createContext()) {
@@ -25,6 +24,7 @@ public class RequestReplyDemo {
             // A: How do you do?
             JMSProducer producer = jmsContext.createProducer();
             TextMessage message = jmsContext.createTextMessage("How do you do?");
+            Queue replyQueue = jmsContext.createTemporaryQueue();
             message.setJMSReplyTo(replyQueue);
             producer.send(requestQueue, message);
 
