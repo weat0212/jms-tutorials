@@ -1,4 +1,4 @@
-package com.andywang.startup;
+package com.andywang.jms.v1;
 
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;

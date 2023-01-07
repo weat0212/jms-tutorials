@@ -1,4 +1,4 @@
-package com.andywang.startup;
+package com.andywang.jms.v1;
 
 import com.andywang.vo.CustomMessage;
 
