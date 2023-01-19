@@ -13,6 +13,10 @@ import javax.jms.ObjectMessage;
 import javax.jms.Queue;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.stream.IntStream;
 
 public class JobBankApp {
 
@@ -21,6 +25,8 @@ public class JobBankApp {
         InitialContext initialContext = new InitialContext();
         Queue requestQueue = (Queue) initialContext.lookup("queue/requestQueue");
         Queue replyQueue = (Queue) initialContext.lookup("queue/replyQueue");
+
+        Random rand = new Random();
 
         try (ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
                 JMSContext jmsContext =  cf.createContext()) {
@@ -32,7 +38,17 @@ public class JobBankApp {
             Candidates candidate2 =
                     Candidates.builder().id("B987654321").age(18).education(Education.HighSchool).name("6865").resume("I'm a bonus sucker").build();
 
-            Candidates[] candidates = new Candidates[] { candidate1, candidate2 };
+            List<Candidates> candidates = new ArrayList<>();
+            candidates.add(candidate1);
+            candidates.add(candidate2);
+            IntStream.rangeClosed(1, 10).forEach(i -> {
+                candidates.add(
+                        Candidates.builder()
+                                .id("E" + Math.round(Math.random() * 1000000000))
+                                .name("ddos")
+                                .age(25)
+                                .education(Education.findByCode(rand.nextInt(4) + 1)).build());
+            });
 
             for (Candidates candidate : candidates) {
                 ObjectMessage objectMessage = jmsContext.createObjectMessage();
@@ -41,7 +57,7 @@ public class JobBankApp {
             }
 
             JMSConsumer consumer = jmsContext.createConsumer(replyQueue);
-            for (int i = 1; i <= candidates.length; i++) {
+            for (int i = 1; i <= candidates.size(); i++) {
                 MapMessage replyMessage = (MapMessage) consumer.receive(30000);
                 try {
                     System.out.println("Candidate is " + (replyMessage.getBoolean("Approved") ? "Approved" : "Not Approved"));
