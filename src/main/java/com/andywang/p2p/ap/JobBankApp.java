@@ -14,7 +14,7 @@ import javax.jms.Queue;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-public class RecruiterApp {
+public class JobBankApp {
 
     public static void main(String[] args) throws NamingException, JMSException {
 

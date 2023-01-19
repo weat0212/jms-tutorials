@@ -16,14 +16,20 @@ import javax.naming.NamingException;
 
 public class EligibilityCheckListener implements MessageListener {
 
+    private InitialContext initialContext;
+    private Queue replyQueue;
+
+    public EligibilityCheckListener() throws NamingException {
+        initialContext = new InitialContext();
+        replyQueue = (Queue) initialContext.lookup("queue/replyQueue");
+    }
+
     @Override
     public void onMessage(Message message) {
         ObjectMessage objectMessage = (ObjectMessage) message;
         try (ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
                 JMSContext jmsContext =  cf.createContext()) {
 
-            InitialContext initialContext = new InitialContext();
-            Queue replyQueue = (Queue) initialContext.lookup("queue/replyQueue");
             MapMessage mapMessage = jmsContext.createMapMessage();
 
             Candidates candidate = (Candidates) objectMessage.getObject();
@@ -38,7 +44,7 @@ public class EligibilityCheckListener implements MessageListener {
             }
             jmsContext.createProducer().send(replyQueue, mapMessage);
 
-        } catch (JMSException | NamingException ex) {
+        } catch (JMSException ex) {
             ex.printStackTrace();
         }
     }
