@@ -38,9 +38,11 @@ public class SecurityApp {
             consumer = jmsContext.createDurableConsumer(topic, SUBSCRIPTION_NAME);
             System.out.println("Server Up!!!");
 
-            Message receivedMessage = consumer.receive();
-            Employee employee = receivedMessage.getBody(Employee.class);
-            System.out.println(employee);
+            for (int i = 0; i < 10; i++) {
+                Message receivedMessage = consumer.receive();
+                Employee employee = receivedMessage.getBody(Employee.class);
+                System.out.println(employee);
+            }
 
             consumer.close();
             jmsContext.unsubscribe(SUBSCRIPTION_NAME);
