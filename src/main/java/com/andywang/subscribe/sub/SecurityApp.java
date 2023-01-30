@@ -13,7 +13,10 @@ import javax.naming.NamingException;
 
 public class SecurityApp {
 
-    public static void main(String[] args) throws NamingException, JMSException {
+    public static final String SUBSCRIPTION_NAME = SecurityApp.class.getSimpleName();
+    public static final String CLIENT_ID = SecurityApp.class.getSimpleName();
+
+    public static void main(String[] args) throws NamingException, JMSException, InterruptedException {
 
         InitialContext initialContext = new InitialContext();
         Topic topic = (Topic) initialContext.lookup("topic/empTopic");
@@ -21,10 +24,26 @@ public class SecurityApp {
         try (ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
              JMSContext jmsContext =  cf.createContext()) {
 
-            JMSConsumer consumer = jmsContext.createConsumer(topic);
+            // Durable subscription
+            jmsContext.setClientID(CLIENT_ID);
+
+            JMSConsumer consumer = jmsContext.createDurableConsumer(topic, SUBSCRIPTION_NAME);
+
+            // Mocking server down
+            consumer.close();
+            System.out.println("Server Down...");
+            Thread.sleep(10000);
+
+            // Restart
+            consumer = jmsContext.createDurableConsumer(topic, SUBSCRIPTION_NAME);
+            System.out.println("Server Up!!!");
+
             Message receivedMessage = consumer.receive();
             Employee employee = receivedMessage.getBody(Employee.class);
             System.out.println(employee);
+
+            consumer.close();
+            jmsContext.unsubscribe(SUBSCRIPTION_NAME);
         }
     }
 }

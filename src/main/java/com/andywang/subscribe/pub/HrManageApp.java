@@ -23,6 +23,7 @@ public class HrManageApp {
                             .designation("Software Engineer").email("weat0212@gmail.com").phone("0912345678").build();
 
             jmsContext.createProducer().send(topic, employee);
+            System.out.println("Message Sent");
         }
     }
 }
