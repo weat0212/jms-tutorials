@@ -47,7 +47,10 @@ public class Postman {
             // 3. String
 //            JMSConsumer consumer = jmsContext.createConsumer(queue, "sender LIKE 'A%'");
 //            JMSConsumer consumer = jmsContext.createConsumer(queue, "sender LIKE 'And_'");
-            JMSConsumer consumer = jmsContext.createConsumer(queue, "receiverAddress IN ('Taiwan','USA')");
+//            JMSConsumer consumer = jmsContext.createConsumer(queue, "receiverAddress IN ('Taiwan','USA')");
+
+            // filtering specific header
+            JMSConsumer consumer = jmsContext.createConsumer(queue, "JMSPriority BETWEEN 3 AND 5");
 
             Mail receivedMail = consumer.receiveBody(Mail.class, 5000);
             System.out.println(receivedMail.toString());
