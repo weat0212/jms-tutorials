@@ -18,8 +18,9 @@ public class MessageConsumer {
 
         // default: AUTO_ACKNOWLEDGE
 
-        clientAcknowledge();
+//        clientAcknowledge();
 //        dupOkAcknowledge();
+        sessionTransacted();
     }
 
     @SneakyThrows
@@ -57,6 +58,28 @@ public class MessageConsumer {
             Message receivedMessage = consumer.receive();
             CustomMessage customMessage = receivedMessage.getBody(CustomMessage.class);
             System.out.println(customMessage.toString());
+        }
+    }
+
+    @SneakyThrows
+    static void sessionTransacted() {
+
+        InitialContext initialContext = new InitialContext();
+        Queue queue = (Queue) initialContext.lookup("queue/requestQueue");
+
+        try (ActiveMQConnectionFactory cf = new ActiveMQConnectionFactory();
+             JMSContext jmsContext = cf.createContext(JMSContext.SESSION_TRANSACTED)) {
+
+            JMSConsumer consumer = jmsContext.createConsumer(queue);
+
+            Message receivedMessage = consumer.receive();
+            CustomMessage customMessage = receivedMessage.getBody(CustomMessage.class);
+            System.out.println(customMessage.toString());
+
+            // Try to comment this line, JMS Provider will keep sending the same message until commit
+            jmsContext.commit();
+
+//            jmsContext.rollback();
         }
     }
 }
