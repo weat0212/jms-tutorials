@@ -1,0 +1,1 @@
+copy artemis-roles.properties, artemis-roles.properties, broker.xml to root/broker/etc
